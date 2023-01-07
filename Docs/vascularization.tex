@@ -1,0 +1,119 @@
+\documentclass{article}
+
+\title{}
+\author{Nick Jagiella}
+\date{Mai 2010}
+
+\begin{document}
+   \maketitle
+
+\section{Vascularization}
+\subsection{Initial Bloodvessel Network}
+\subsubsection{Random Growth of Arterial and Venous Trees from Initial Nodes}
+Vessels grow and branch stochastically until all lattice points are occupied. The radii of the vessel tip are assumed to be $r = 4\mu m$. Then the radii of the remaining vessel trees can be calculated recursively by $r_{root}^\alpha = r_{left}^\alpha + r_{right}^\alpha$. In literature the values of $\alpha$ vary between 2 and 3 depending on the vessel size and tissue. Here we assume $\alpha = 2.7$ as proposed by [Kurz and Sandau: 1997].
+\subsubsection{Remodelling in order to homogenize Capilarial Shear Stress}
+In order to obtain a functional network it has to be ensured that there is a flow in all parts of the network. So a possible criteria for vessel collapse and sprouting could be (insufficient and sufficient) the flow in the vessel tips. [Goedde and Kurz: 2001] found that it is rather the capillary shear stress which regulates the vessel remodelling.
+
+\paragraph{Pressure and Flow:}
+The relation between the flow, $f_k$, through a vessel segment $k$ and the pressure of its vessel nodes, $\Delta p_k = p
+_{k1} - p_{k2}$, is described by the law of Hagen-Poiseeuille as following.
+\begin{equation}
+	f_k = \frac{\pi}{8} \cdot \frac{r^4_k}{\eta_k(r_k)\cdot l_k}\cdot \Delta p_k = G_k \cdot \Delta p_k\label{eq:flow}
+\end{equation}
+The pressure in the vessel nodes can be calculated by solving a linear system of the relation between the pressure in node $k$ and its neighbor nodes $i$.
+\begin{equation}
+	\sum_i G_i\cdot p_k - \sum_i G_i\cdot p_i = 0\label{eq:pressure}
+\end{equation}
+In the following the flow in the vessel segments are obtained by equation \ref{eq:flow}.
+
+\paragraph{Shear Stress:}
+The shear stress is given by 
+\begin{equation}
+	\tau_k = \frac{\Delta p_k}{2 \cdot l_k} \cdot r_k\label{eq:shearStress}
+\end{equation}
+
+
+\paragraph{Algorithm:}
+\begin{enumerate}
+ \item Calculate pressure (eq. \ref{eq:pressure}), flow (eq. \ref{eq:flow}) and shear stress (eq. \ref{eq:shearStress}) in vessel network
+ \item Estimate minimum and maximum shear stress: $\tau_{min}$ and $\tau_{max}$.
+ \item Select randomly a certain number of tips and perform a collapse with probability $p_i = \frac{\tau_{i}-\tau_{min}}{\tau_{max}-\tau_{min}}$. 
+ \item Perfom growth/sprouting of randomly choosen nodes until all points are occupied.
+ \item Go back to (1.). 
+\end{enumerate}
+
+\begin{tabular}{l|l|l|l}
+	Parameter	& Unit	&Value	&Description \\ \hline
+	$r_k$		& $\mu m$	& $4$ (in tips) & radius of vessel segment \\
+	$l_k$		& $\mu m$	& - 		& length of vessel segment \\
+	$f_k$		& $\mu m^3 \cdot s^{-1}$	& -	& flow through vessel segment \\
+	$\Delta p_k$	& $kPa$		& - 		& pressure difference among vessel segment \\
+	$\eta$		& $kPa \cdot s$	& -		& blood viscosity \\
+	$\tau$		& $kPa$		& -		& shear stress \\
+	$k_{PS}$	& $\mu m^3 \cdot s^{-1}$& -	& exchange rate between vessel and interstitial space \\
+	$C_V$		& $mM$	& -		& marker concentration in vessel \\
+	$C_T$		& $mM$	& -		& marker concentration in interstitial space \\
+	$C$		& $mM$	& -		& total marker concentration \\
+	$V_V$		& $\mu m^3$	& -		& marker concentration in vessel \\
+	$V_T$		& $\mu m^3$	& -		& marker concentration in interstitial space \\
+	$V = V_V+V_T$	& $\mu m^3$	& -		& total marker concentration \\
+\end{tabular}
+
+\subsection{Vessel Remodelling and Angiogenesis}
+
+\section{Brix Model}
+\subsection{Equation (Intra-vascular Marker)}
+\begin{equation}
+	\frac{\partial C_V}{\partial t} = \frac{f}{V_V}(C_V - C_A) - \frac{k_{PS}}{V_V}(C_V - C_T)
+\end{equation}
+
+\subsection{Numerical Scheme (Intra-vascular Marker)}
+\begin{equation}
+	\frac{C_V^{n+1}-C_V^n}{dt} =  \sum_i \frac{f_i}{V_V} (C_A - C_{V}^{n+1}) - \frac{k_{PS}}{V_V}(C_V^{n+1} - C_T^{n+1})
+\end{equation}
+\begin{equation}
+	\underbrace{\left(1 + \sum_i dt \frac{f_i}{V_V} + dt\frac{k_{PS}}{V_V}\right)}_{r} C_V^{n+1} - dt \frac{k_{PS}}{V_V}C_T^{n+1}
+	= C_V^n + C_A dt \sum_i  \frac{f_i}{V_V} 
+\end{equation}
+\begin{equation}
+	C_V^{n+1} - \frac{dt}{r} \frac{k_{PS}}{V_V}C_T^{n+1}
+	= \frac{1}{r}C_V^n + \frac{dt}{r}C_A \sum_i  \frac{f_i}{V_V} 
+\end{equation}
+
+
+\section{Extended Brix Model}
+\subsection{Equations}
+\begin{equation}
+	\frac{\partial C_V}{\partial t} = \frac{f}{V_V}C_V - \frac{k_{PS}}{V_V}(C_V - C_T)
+\end{equation}
+\begin{equation}
+	\frac{\partial C_T}{\partial t} = D\Delta C_T + \frac{k_{PS}}{V_T}(C_V - C_T)
+\end{equation}
+
+\subsection{Numerical Scheme}
+\subsubsection{Intra-vascular Marker}
+\begin{equation}
+	\frac{C_V^{n+1}-C_V^n}{dt} =  \sum_i \frac{f_i}{V_V} C_{V,i}^{n+1} - \sum_o \frac{f_o}{V_V}C_{V}^{n+1} - \frac{k_{PS}}{V_V}(C_V^{n+1} - C_T^{n+1})
+\end{equation}
+\begin{equation}
+	\underbrace{\left(1 + \frac{dt}{V_V}\sum_o f_o + \frac{dt}{V_V} k_{PS}\right)}_{r}  C_V^{n+1} - \frac{dt}{V_V} \sum_i f_i C_{V,i}^{n+1} - \frac{dt}{V_V} k_{PS} C_T^{n+1} = C_V^n
+\end{equation}
+\begin{equation}
+	C_V^{n+1} - \frac{dt}{r\cdot V_V} \sum_i f_i C_{V,i}^{n+1} - \frac{dt}{r\cdot V_V} k_{PS} C_T^{n+1} = \frac{1}{r}C_V^n
+\end{equation}
+
+\subsubsection{Extra-vascular Marker}
+\begin{equation}
+	\frac{C_T^{n+1} - C_T^{n}}{dt} = \frac{D}{h^2} \sum_i \left(C_{T,i}^{n+1} - C_{T}^{n+1} \right) + \frac{k_{PS}}{V_T}(C_V^{n+1} - C_T^{n+1})
+\end{equation}
+\begin{equation}
+	\underbrace{\left(1 + dt \cdot \frac{D}{h^2} \sum_i 1 + dt\frac{k_{PS}}{V_T}\right)}_{r} C_T^{n+1} - dt \cdot \frac{D}{h^2} \sum_i C_{T,i}^{n+1} - dt\frac{k_{PS}}{V_T}C_V^{n+1} = C_T^{n}
+\end{equation}
+\begin{equation}
+	C_T^{n+1} - \frac{dt}{r} \cdot \frac{D}{h^2} \sum_i C_{T,i}^{n+1} - \frac{dt}{r}\frac{k_{PS}}{V_T}C_V^{n+1} = \frac{1}{r}C_T^{n}
+\end{equation}
+
+
+
+\end{document}
+
